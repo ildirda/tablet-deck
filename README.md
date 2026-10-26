@@ -22,6 +22,8 @@
   <a href="https://nodiecode.github.io/tablet-deck/try/"><b>▶&nbsp;Try it in your browser</b></a>
   &nbsp;&nbsp;·&nbsp;&nbsp;
   <a href="https://nodiecode.github.io/tablet-deck/"><b>Website</b></a>
+  &nbsp;&nbsp;·&nbsp;&nbsp;
+  <a href="https://buymeacoffee.com/nodiecode"><b>☕&nbsp;Buy me a coffee</b></a>
 </p>
 
 <p align="center">
