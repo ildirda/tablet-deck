@@ -88,6 +88,17 @@
     "Hold": ["Mantener", "Maintenir", "Halten"],
     "Long press": ["Pulsación larga", "Appui long", "Lang drücken"],
 
+    // ---------- notepad ----------
+    "Cargo notes": ["Notas de carga", "Notes de cargo", "Frachtnotizen"],
+    "Pen": ["Lápiz", "Stylo", "Stift"],
+    "Eraser": ["Borrador", "Gomme", "Radierer"],
+    "Undo": ["Deshacer", "Annuler", "Rückgängig"],
+    "Clear": ["Borrar", "Effacer", "Löschen"],
+    "Clear page?": ["¿Borrar página?", "Effacer la page ?", "Seite löschen?"],
+    "Previous page": ["Página anterior", "Page précédente", "Vorherige Seite"],
+    "Next page": ["Página siguiente", "Page suivante", "Nächste Seite"],
+    "Draw or write here. Notes stay on this device.": ["Dibuja o escribe aquí. Las notas se quedan en este dispositivo.", "Dessinez ou écrivez ici. Les notes restent sur cet appareil.", "Hier zeichnen oder schreiben. Die Notizen bleiben auf diesem Gerät."],
+
     // ---------- theme taglines ----------
     "Classic interstellar lines": ["Líneas interestelares clásicas", "Lignes interstellaires classiques", "Klassische interstellare Linien"],
     "Built rough, flown hard": ["Construido a lo bruto, pilotado a tope", "Construit brut, piloté dur", "Rau gebaut, hart geflogen"],

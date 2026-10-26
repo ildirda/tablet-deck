@@ -7,6 +7,7 @@
   const tr = (s) => (window.DeckI18n ? window.DeckI18n.t(s) : s);
 
   let current = null; // the deck drawn last; a new one replaces it (switching layouts)
+  let penSeen = false; // a pen has drawn on a notepad, so fingers there are a resting palm
 
   window.renderCanvas = function renderCanvas(layout, D) {
     if (current) current.dispose();
@@ -227,7 +228,151 @@
         for (const b of e.buttons) wrap.appendChild(hudButton(b, e.compact ? "std" : "cell"));
         return wrap;
       },
+
+      notepad: (e) => notepad(e),
     };
+
+    // A page to draw on with a finger or pen, e.g. which cargo goes where. It presses no
+    // keys; the drawings stay on this device, kept as strokes in fractions of the pad so
+    // they survive redraws, rotation and theme changes (colours are theme tokens).
+    const PAGES = 3;
+    const INKS = ["text", "accent", "amber", "red"];
+    function notepad(e) {
+      const storeKey = `notes-${e.id || "notepad"}`;
+      const saved = (() => { try { return JSON.parse(D.store.get(storeKey) || "{}"); } catch { return {}; } })();
+      const notes = { page: Math.min(saved.page || 0, PAGES - 1), pages: Array.from({ length: PAGES }, (_, i) => (saved.pages || [])[i] || []) };
+      const keep = () => D.store.set(storeKey, JSON.stringify(notes));
+      const history = []; // this visit's changes on each page, for Undo: a stroke, or a cleared page
+
+      const el = box(make("div", "hud-notepad", `
+        <div class="np-bar">
+          ${INKS.map((c) => `<button type="button" class="np-tool np-ink" data-ink="${c}" style="--ink:var(--${c})" aria-label="${tr("Pen")}"><i></i></button>`).join("")}
+          <button type="button" class="np-tool" data-tool="eraser" aria-label="${tr("Eraser")}">${D.deckIcon("eraser")}</button>
+          <span class="np-gap"></span>
+          <button type="button" class="np-tool" data-tool="undo" aria-label="${tr("Undo")}">${D.deckIcon("undo")}</button>
+          <button type="button" class="np-tool np-clear" data-tool="clear" aria-label="${tr("Clear")}">${D.deckIcon("trash")}<span></span></button>
+          <span class="np-gap"></span>
+          <button type="button" class="np-tool" data-tool="prev" aria-label="${tr("Previous page")}">${D.deckIcon("chev-left")}</button>
+          <span class="np-page"></span>
+          <button type="button" class="np-tool" data-tool="next" aria-label="${tr("Next page")}">${D.deckIcon("chev-right")}</button>
+        </div>
+        <div class="np-sheet"><canvas></canvas><p class="np-empty"></p></div>`), e);
+      const sheet = el.querySelector(".np-sheet"), cv = el.querySelector("canvas"), empty = el.querySelector(".np-empty");
+      const clearBtn = el.querySelector(".np-clear");
+      empty.textContent = tr("Draw or write here. Notes stay on this device.");
+      let tool = saved.tool && (INKS.includes(saved.tool) || saved.tool === "eraser") ? saved.tool : "text";
+      let ctx = null, ratio = 1;
+
+      const strokes = () => notes.pages[notes.page];
+      function paint() {
+        if (!ctx) return;
+        const w = cv.width / ratio, h = cv.height / ratio, css = getComputedStyle(el);
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+        for (const st of strokes()) drawStroke(st, w, h, css);
+        empty.hidden = strokes().length > 0;
+        el.querySelector(".np-page").textContent = `${notes.page + 1}/${PAGES}`;
+        for (const b of el.querySelectorAll(".np-tool[data-ink], [data-tool=eraser]")) b.classList.toggle("on", (b.dataset.ink || "eraser") === tool);
+      }
+      function drawStroke(st, w, h, css) {
+        const p = st.p;
+        ctx.globalCompositeOperation = st.c === "eraser" ? "destination-out" : "source-over";
+        ctx.strokeStyle = ctx.fillStyle = st.c === "eraser" ? "#000" : css.getPropertyValue(`--${st.c}`).trim() || "#fff";
+        ctx.lineWidth = st.c === "eraser" ? 26 : 3;
+        ctx.lineCap = ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(p[0] * w, p[1] * h);
+        if (p.length === 2) ctx.lineTo(p[0] * w + 0.1, p[1] * h); // a dot
+        for (let i = 2; i < p.length; i += 2) ctx.lineTo(p[i] * w, p[i + 1] * h);
+        ctx.stroke();
+        ctx.globalCompositeOperation = "source-over";
+      }
+      // The canvas gets the sheet's size in screen pixels, so lines stay sharp at any scale.
+      function size() {
+        const r = sheet.getBoundingClientRect();
+        if (!r.width) return;
+        ratio = (window.devicePixelRatio || 1) * scaleNow();
+        cv.width = Math.round(r.width / scaleNow() * ratio);
+        cv.height = Math.round(r.height / scaleNow() * ratio);
+        ctx = cv.getContext("2d");
+        paint();
+      }
+      requestAnimationFrame(size);
+      // Ink follows the theme, so repaint when it changes.
+      const themeWatch = new MutationObserver(() => { if (el.isConnected) paint(); else themeWatch.disconnect(); });
+      themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-contrast"] });
+
+      // One stroke at a time. Once a pen has drawn, fingers don't, so a resting palm leaves
+      // no marks; a second finger (or the two-finger swipe) ends the stroke.
+      let drawing = null;
+      cv.addEventListener("pointerdown", (ev) => {
+        if (ev.pointerType === "pen") penSeen = true;
+        else if (ev.pointerType === "touch" && penSeen) return;
+        if (drawing) { finish({ pointerId: drawing.id }); return; }
+        ev.preventDefault();
+        cv.setPointerCapture(ev.pointerId);
+        drawing = { id: ev.pointerId, st: { c: tool, p: [] } };
+        add(ev);
+        strokes().push(drawing.st);
+        paint();
+      });
+      function add(ev) {
+        const r = cv.getBoundingClientRect(), p = drawing.st.p;
+        const x = (ev.clientX - r.left) / r.width, y = (ev.clientY - r.top) / r.height;
+        // Skip points closer than about a pixel to the last, so notes stay small to keep.
+        if (p.length && Math.abs(x - p[p.length - 2]) * r.width < 1.5 && Math.abs(y - p[p.length - 1]) * r.height < 1.5) return;
+        p.push(Math.round(x * 10000) / 10000, Math.round(y * 10000) / 10000);
+      }
+      function finish(ev) {
+        if (!drawing || ev.pointerId !== drawing.id) return;
+        history.push({ page: notes.page, stroke: drawing.st });
+        drawing = null;
+        keep();
+      }
+      cv.addEventListener("pointermove", (ev) => {
+        if (!drawing || ev.pointerId !== drawing.id) return;
+        for (const c of ev.getCoalescedEvents ? ev.getCoalescedEvents() : [ev]) add(c);
+        paint();
+      });
+      cv.addEventListener("pointerup", finish);
+      cv.addEventListener("pointercancel", finish);
+
+      let clearArmed = null;
+      const disarm = () => { clearTimeout(clearArmed); clearArmed = null; clearBtn.classList.remove("armed"); clearBtn.querySelector("span").textContent = ""; };
+      el.querySelector(".np-bar").addEventListener("click", (ev) => {
+        const b = ev.target.closest(".np-tool");
+        if (!b) return;
+        const t = b.dataset.ink || b.dataset.tool;
+        if (t !== "clear") disarm();
+        if (INKS.includes(t) || t === "eraser") tool = t;
+        else if (t === "undo") {
+          for (let i = history.length - 1; i >= 0; i--) {
+            if (history[i].page !== notes.page) continue;
+            const [h] = history.splice(i, 1);
+            if (h.cleared) notes.pages[h.page] = h.cleared;
+            else notes.pages[h.page] = strokes().filter((s) => s !== h.stroke);
+            break;
+          }
+        } else if (t === "clear") {
+          // Clearing asks first: the first tap arms it, a second within 3 s clears the page.
+          if (!clearArmed) {
+            if (!strokes().length) return;
+            clearBtn.classList.add("armed");
+            clearBtn.querySelector("span").textContent = tr("Clear page?");
+            clearArmed = setTimeout(disarm, 3000);
+            return;
+          }
+          disarm();
+          history.push({ page: notes.page, cleared: strokes() });
+          notes.pages[notes.page] = [];
+        } else if (t === "prev" || t === "next") notes.page = (notes.page + (t === "next" ? 1 : PAGES - 1)) % PAGES;
+        if (D.buzz) D.buzz(10);
+        notes.tool = tool;
+        keep();
+        paint();
+      });
+      return el;
+    }
 
 
     function openMenu(e) {

@@ -5,6 +5,14 @@ section becomes the notes of its
 [GitHub release](https://github.com/nodieCode/tablet-deck/releases), so add one
 before tagging a release.
 
+## Unreleased
+
+- **Cargo notes:** the Hauling & Exploration layout has a notepad panel next
+  to QT/Systems, to jot down which cargo goes where and where it sits in your
+  grid. Draw with a finger or an Apple Pencil in four colours, erase, undo, and
+  flip between three pages. Notes stay on that tablet or phone; once a pen has
+  drawn, a resting palm doesn't.
+
 ## 1.6.0 (2026-10-26)
 
 - **Español, Français and Deutsch:** the deck and the app window can show

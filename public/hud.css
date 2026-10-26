@@ -282,3 +282,36 @@ body.canvas-mode { overflow: hidden; }
 .compact .s-hero .fx-state, .compact .s-quantum .fx-state { bottom: 3px; }
 .compact .hud-caption { gap: 2px; }
 .compact .hud-caption .hud-ico svg { width: 20px; height: 20px; }
+
+/* Notepad: a toolbar over a sheet to draw on. */
+.hud-notepad { display: flex; flex-direction: column; gap: 8px; }
+.np-bar { display: flex; align-items: center; gap: 6px; height: 40px; flex: none; }
+.np-tool {
+  height: 40px; min-width: 40px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  background: linear-gradient(180deg, var(--hud-face-hi), var(--hud-face)); border: 1px solid var(--hud-line);
+  border-radius: min(var(--key-radius), 6px); color: var(--text); touch-action: manipulation; cursor: pointer;
+  font: 600 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase;
+}
+.np-tool svg { width: 22px; height: 22px; stroke-width: var(--icon-stroke); }
+.np-tool.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.np-ink i { width: 18px; height: 18px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 6px color-mix(in srgb, var(--ink) 50%, transparent); }
+.np-clear.armed { border-color: var(--red); color: var(--red); }
+.np-gap { flex: 1; }
+.np-page { min-width: 34px; text-align: center; font: 600 12px/1 var(--font-body); letter-spacing: .1em; color: var(--dim); }
+.np-sheet {
+  position: relative; flex: 1; min-height: 0; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 4px;
+  background:
+    linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 100% 32px,
+    color-mix(in srgb, var(--panel) 70%, transparent);
+}
+.np-sheet canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+.np-empty {
+  position: absolute; left: 0; right: 0; top: 45%; margin: 0; padding: 0 20px; text-align: center; pointer-events: none;
+  font: 500 13px/1.4 var(--font-body); color: var(--dim); opacity: .8;
+}
+.compact .hud-notepad { gap: 5px; }
+.compact .np-bar { height: 32px; gap: 4px; }
+.compact .np-tool { height: 32px; min-width: 32px; padding: 0 6px; }
+.compact .np-tool svg { width: 18px; height: 18px; }
+.compact .np-ink i { width: 14px; height: 14px; }

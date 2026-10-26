@@ -267,7 +267,7 @@ choose under **Layout**. Each tablet and phone remembers its own choice:
 | **Tablet Deck HUD** (default) | Power/Landing, Flight Assist, Shields, Targeting, Salvage and Mining on the left; QT/Systems, Operator Modes, Combat, Crew/Doors, On Foot and Emotes on the right |
 | **Combat** | Power/Landing, Shields, Targeting and Flight Assist first; Combat, QT/Systems, Operator Modes and Crew first |
 | **Mining & Salvage** | Mining and Salvage first; Operator Modes, QT/Systems, Crew and On Foot first |
-| **Hauling & Exploration** | Power/Landing, Flight Assist and Targeting first; QT/Systems, Crew, On Foot and Emotes first |
+| **Hauling & Exploration** | Power/Landing, Flight Assist and Targeting first; QT/Systems, [Cargo notes](#cargo-notes), Crew, On Foot and Emotes first |
 | **Prospector** | A Prospector panel first (laser, modules, flight ready, gear, lights, quantum), then Mining; Operator Modes first |
 | **Vulture** | A Vulture panel first (salvage, flight ready, gear, VTOL, quantum, doors), then Salvage; Operator Modes first |
 | **Star Citizen** | A simpler tabbed grid of buttons |
@@ -283,6 +283,16 @@ Hold the phone sideways. Layouts you make in the editor show up in the list too.
 sideways with two fingers over a half to flip it to its next or previous panel,
 like its arrows. So a swipe never presses anything, a press then waits a moment
 (60 ms) in case a second finger follows; with it off, presses are instant.
+
+### Cargo notes
+
+The **Hauling & Exploration** layout has a **Cargo notes** panel after
+QT/Systems: a notepad for which cargo goes where, or where each pile sits in the
+grid. Draw with a finger or an Apple Pencil, pick one of four colours or the
+eraser, **undo**, and flip between three pages. **Clear** (the bin) asks for a
+second tap first, and Undo brings a cleared page back. Notes are kept on that
+tablet or phone only; nothing is sent to the PC. Once you've drawn with a pen,
+fingers resting on the page don't leave marks.
 
 ### Lit buttons
 
