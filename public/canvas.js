@@ -44,7 +44,15 @@
       canvas.style.transform = `translate(-50%, -50%) scale(${s})`;
       return changed;
     }
-    const fit = () => { if (measure()) render(); };
+    // A redraw would close the keyboard while a notepad is being typed in (Android shrinks
+    // the page for it), so that waits until typing stops.
+    let fitLater = false;
+    const typing = () => document.activeElement && document.activeElement.classList.contains("np-text");
+    const fit = () => {
+      if (typing()) { fitLater = true; return; }
+      fitLater = false;
+      if (measure()) render();
+    };
     const turned = () => setTimeout(fit, 250);
     window.addEventListener("resize", fit);
     window.addEventListener("orientationchange", turned);
@@ -232,22 +240,30 @@
       notepad: (e) => notepad(e),
     };
 
-    // A page to draw on with a finger or pen, e.g. which cargo goes where. It presses no
-    // keys; the drawings stay on this device, kept as strokes in fractions of the pad so
-    // they survive redraws, rotation and theme changes (colours are theme tokens).
+    // A page to draw or type on, e.g. which cargo goes where. It presses no keys; typing
+    // comes from the tablet's own keyboard, never the PC's. Notes stay on this device:
+    // drawings as strokes in fractions of the pad, so they survive redraws, rotation and
+    // theme changes (colours are theme tokens), and each page's text beside them.
     const PAGES = 3;
     const INKS = ["text", "accent", "amber", "red"];
     function notepad(e) {
       const storeKey = `notes-${e.id || "notepad"}`;
       const saved = (() => { try { return JSON.parse(D.store.get(storeKey) || "{}"); } catch { return {}; } })();
-      const notes = { page: Math.min(saved.page || 0, PAGES - 1), pages: Array.from({ length: PAGES }, (_, i) => (saved.pages || [])[i] || []) };
+      const notes = {
+        page: Math.min(saved.page || 0, PAGES - 1),
+        pages: Array.from({ length: PAGES }, (_, i) => (saved.pages || [])[i] || []),
+        texts: Array.from({ length: PAGES }, (_, i) => String((saved.texts || [])[i] || "")),
+      };
       const keep = () => D.store.set(storeKey, JSON.stringify(notes));
-      const history = []; // this visit's changes on each page, for Undo: a stroke, or a cleared page
+      // This visit's changes on each page, for Undo: a stroke, a bout of typing (the text
+      // before it) or a cleared page (its strokes and text).
+      const history = [];
 
       const el = box(make("div", "hud-notepad", `
         <div class="np-bar">
           ${INKS.map((c) => `<button type="button" class="np-tool np-ink" data-ink="${c}" style="--ink:var(--${c})" aria-label="${tr("Pen")}"><i></i></button>`).join("")}
           <button type="button" class="np-tool" data-tool="eraser" aria-label="${tr("Eraser")}">${D.deckIcon("eraser")}</button>
+          <button type="button" class="np-tool np-type" data-tool="type" aria-label="${tr("Type")}">Aa</button>
           <span class="np-gap"></span>
           <button type="button" class="np-tool" data-tool="undo" aria-label="${tr("Undo")}">${D.deckIcon("undo")}</button>
           <button type="button" class="np-tool np-clear" data-tool="clear" aria-label="${tr("Clear")}">${D.deckIcon("trash")}<span></span></button>
@@ -256,11 +272,13 @@
           <span class="np-page"></span>
           <button type="button" class="np-tool" data-tool="next" aria-label="${tr("Next page")}">${D.deckIcon("chev-right")}</button>
         </div>
-        <div class="np-sheet"><canvas></canvas><p class="np-empty"></p></div>`), e);
+        <div class="np-sheet"><textarea class="np-text" spellcheck="false" autocomplete="off"></textarea><canvas></canvas><p class="np-empty"></p></div>`), e);
       const sheet = el.querySelector(".np-sheet"), cv = el.querySelector("canvas"), empty = el.querySelector(".np-empty");
+      const textBox = el.querySelector(".np-text");
+      textBox.setAttribute("aria-label", tr("Cargo notes"));
       const clearBtn = el.querySelector(".np-clear");
-      empty.textContent = tr("Draw or write here. Notes stay on this device.");
-      let tool = saved.tool && (INKS.includes(saved.tool) || saved.tool === "eraser") ? saved.tool : "text";
+      empty.textContent = tr("Draw or type here. Notes stay on this device.");
+      let tool = saved.tool && (INKS.includes(saved.tool) || saved.tool === "eraser" || saved.tool === "type") ? saved.tool : "text";
       let ctx = null, ratio = 1;
 
       const strokes = () => notes.pages[notes.page];
@@ -270,9 +288,15 @@
         ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
         ctx.clearRect(0, 0, w, h);
         for (const st of strokes()) drawStroke(st, w, h, css);
-        empty.hidden = strokes().length > 0;
+        showPage();
+      }
+      // Everything but the ink: the page's text, the hint on an empty page, the tools.
+      function showPage() {
+        if (textBox.value !== notes.texts[notes.page]) textBox.value = notes.texts[notes.page];
+        empty.hidden = strokes().length > 0 || notes.texts[notes.page] !== "" || tool === "type";
+        el.classList.toggle("typing", tool === "type");
         el.querySelector(".np-page").textContent = `${notes.page + 1}/${PAGES}`;
-        for (const b of el.querySelectorAll(".np-tool[data-ink], [data-tool=eraser]")) b.classList.toggle("on", (b.dataset.ink || "eraser") === tool);
+        for (const b of el.querySelectorAll(".np-tool[data-ink], [data-tool=eraser], [data-tool=type]")) b.classList.toggle("on", (b.dataset.ink || b.dataset.tool) === tool);
       }
       function drawStroke(st, w, h, css) {
         const p = st.p;
@@ -298,6 +322,19 @@
         paint();
       }
       requestAnimationFrame(size);
+      showPage();
+
+      // Typing. A bout of typing is one Undo step: it starts at the first change after the
+      // box gets the focus, and the text before it is what Undo brings back.
+      let typedFrom = null;
+      textBox.addEventListener("focus", () => { typedFrom = notes.texts[notes.page]; });
+      textBox.addEventListener("input", () => {
+        if (typedFrom !== null) { history.push({ page: notes.page, text: typedFrom }); typedFrom = null; }
+        notes.texts[notes.page] = textBox.value;
+        disarm();
+        keep();
+      });
+      textBox.addEventListener("blur", () => { typedFrom = null; if (fitLater) setTimeout(fit, 0); });
       // Ink follows the theme, so repaint when it changes.
       const themeWatch = new MutationObserver(() => { if (el.isConnected) paint(); else themeWatch.disconnect(); });
       themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-contrast"] });
@@ -337,6 +374,10 @@
       cv.addEventListener("pointerup", finish);
       cv.addEventListener("pointercancel", finish);
 
+      // While typing, tapping a tool mustn't take the focus from the text (and close the
+      // iPad's keyboard).
+      el.querySelector(".np-bar").addEventListener("mousedown", (ev) => { if (tool === "type") ev.preventDefault(); });
+
       let clearArmed = null;
       const disarm = () => { clearTimeout(clearArmed); clearArmed = null; clearBtn.classList.remove("armed"); clearBtn.querySelector("span").textContent = ""; };
       el.querySelector(".np-bar").addEventListener("click", (ev) => {
@@ -344,28 +385,40 @@
         if (!b) return;
         const t = b.dataset.ink || b.dataset.tool;
         if (t !== "clear") disarm();
-        if (INKS.includes(t) || t === "eraser") tool = t;
-        else if (t === "undo") {
+        if (INKS.includes(t) || t === "eraser") { tool = t; textBox.blur(); }
+        else if (t === "type") {
+          tool = "type";
+          showPage();
+          textBox.focus(); // within the tap, so the iPad shows its keyboard
+          textBox.setSelectionRange(textBox.value.length, textBox.value.length);
+        } else if (t === "undo") {
           for (let i = history.length - 1; i >= 0; i--) {
             if (history[i].page !== notes.page) continue;
             const [h] = history.splice(i, 1);
-            if (h.cleared) notes.pages[h.page] = h.cleared;
+            if (h.cleared) { notes.pages[h.page] = h.cleared; notes.texts[h.page] = h.clearedText; }
+            else if (h.text !== undefined) notes.texts[h.page] = h.text;
             else notes.pages[h.page] = strokes().filter((s) => s !== h.stroke);
+            typedFrom = document.activeElement === textBox ? notes.texts[notes.page] : null;
             break;
           }
         } else if (t === "clear") {
           // Clearing asks first: the first tap arms it, a second within 3 s clears the page.
           if (!clearArmed) {
-            if (!strokes().length) return;
+            if (!strokes().length && !notes.texts[notes.page]) return;
             clearBtn.classList.add("armed");
             clearBtn.querySelector("span").textContent = tr("Clear page?");
             clearArmed = setTimeout(disarm, 3000);
             return;
           }
           disarm();
-          history.push({ page: notes.page, cleared: strokes() });
+          history.push({ page: notes.page, cleared: strokes(), clearedText: notes.texts[notes.page] });
           notes.pages[notes.page] = [];
-        } else if (t === "prev" || t === "next") notes.page = (notes.page + (t === "next" ? 1 : PAGES - 1)) % PAGES;
+          notes.texts[notes.page] = "";
+          if (document.activeElement === textBox) typedFrom = "";
+        } else if (t === "prev" || t === "next") {
+          notes.page = (notes.page + (t === "next" ? 1 : PAGES - 1)) % PAGES;
+          if (document.activeElement === textBox) typedFrom = notes.texts[notes.page];
+        }
         if (D.buzz) D.buzz(10);
         notes.tool = tool;
         keep();

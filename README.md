@@ -289,10 +289,17 @@ like its arrows. So a swipe never presses anything, a press then waits a moment
 The **Hauling & Exploration** layout has a **Cargo notes** panel after
 QT/Systems: a notepad for which cargo goes where, or where each pile sits in the
 grid. Draw with a finger or an Apple Pencil, pick one of four colours or the
-eraser, **undo**, and flip between three pages. **Clear** (the bin) asks for a
-second tap first, and Undo brings a cleared page back. Notes are kept on that
-tablet or phone only; nothing is sent to the PC. Once you've drawn with a pen,
-fingers resting on the page don't leave marks.
+eraser, **undo**, and flip between three pages.
+
+- **Typing:** tap **Aa**, then type with the tablet's on-screen keyboard or a
+  Bluetooth keyboard paired with the tablet. The text sits on the ruled lines;
+  pick a colour again to draw over it (arrows, circles, a sketch of your cargo
+  grid). Your PC's keyboard keeps going to Star Citizen, so typing here never
+  reaches the game.
+- **Clear** (the bin) asks for a second tap first and clears the page's drawing
+  and text; Undo brings them back, and also undoes typing.
+- Notes are kept on that tablet or phone only; nothing is sent to the PC. Once
+  you've drawn with a pen, fingers resting on the page don't leave marks.
 
 ### Lit buttons
 

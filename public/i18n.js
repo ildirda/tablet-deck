@@ -97,7 +97,8 @@
     "Clear page?": ["¿Borrar página?", "Effacer la page ?", "Seite löschen?"],
     "Previous page": ["Página anterior", "Page précédente", "Vorherige Seite"],
     "Next page": ["Página siguiente", "Page suivante", "Nächste Seite"],
-    "Draw or write here. Notes stay on this device.": ["Dibuja o escribe aquí. Las notas se quedan en este dispositivo.", "Dessinez ou écrivez ici. Les notes restent sur cet appareil.", "Hier zeichnen oder schreiben. Die Notizen bleiben auf diesem Gerät."],
+    "Type": ["Escribir", "Taper", "Tippen"],
+    "Draw or type here. Notes stay on this device.": ["Dibuja o escribe aquí. Las notas se quedan en este dispositivo.", "Dessinez ou tapez ici. Les notes restent sur cet appareil.", "Hier zeichnen oder tippen. Die Notizen bleiben auf diesem Gerät."],
 
     // ---------- theme taglines ----------
     "Classic interstellar lines": ["Líneas interestelares clásicas", "Lignes interstellaires classiques", "Klassische interstellare Linien"],
