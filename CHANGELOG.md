@@ -5,7 +5,7 @@ section becomes the notes of its
 [GitHub release](https://github.com/nodieCode/tablet-deck/releases), so add one
 before tagging a release.
 
-## Unreleased
+## 1.7.0 (2026-10-26)
 
 - **Cargo notes:** the Hauling & Exploration layout has a notepad panel next
   to QT/Systems, to jot down which cargo goes where and where it sits in your
