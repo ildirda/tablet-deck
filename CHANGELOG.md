@@ -5,6 +5,12 @@ section becomes the notes of its
 [GitHub release](https://github.com/nodieCode/tablet-deck/releases), so add one
 before tagging a release.
 
+## Unreleased
+
+- **Català:** add Catalan to the deck and Windows app, with automatic selection
+  from the device or Windows language and manual selection in Settings. Existing
+  languages, keybinds and English voice commands are unchanged.
+
 ## 1.6.0 (2026-10-26)
 
 - **Español, Français and Deutsch:** the deck and the app window can show
