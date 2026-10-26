@@ -167,6 +167,7 @@
       "h": 664,
       "panels": [
         "qt-systems",
+        "notes",
         "crew",
         "on-foot",
         "emotes",
@@ -176,6 +177,19 @@
     }
   ],
   "panels": {
+    "notes": {
+      "title": "Cargo notes",
+      "elements": [
+        {
+          "type": "notepad",
+          "id": "cargo-notes",
+          "x": 0,
+          "y": 8,
+          "w": 480,
+          "h": 604
+        }
+      ]
+    },
     "power-landing": {
       "title": "Power/Landing",
       "elements": [

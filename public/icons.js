@@ -138,6 +138,12 @@ window.DECK_ICONS = {
   help: `<circle cx="24" cy="24" r="17"/><path d="M18.5 19a5.5 5.5 0 1 1 8 4.9c-1.8.9-2.5 2-2.5 3.6V29"/>
     <circle cx="24" cy="35" r="1.8" fill="currentColor" stroke="none"/>`,
 
+  // The notepad's tools.
+  pen: `<path d="M31 9 39 17 18 38 8 40l2-10Z"/><path d="m27 13 8 8" opacity=".6"/>`,
+  eraser: `<path d="M27 9 40 22 24 38H15l-6-6a3 3 0 0 1 0-4.2Z"/><path d="m18 18 13 13M24 38h16" opacity=".6"/>`,
+  undo: `<path d="M17 12 9 20l8 8"/><path d="M9 20h19a10 10 0 0 1 0 20h-8"/>`,
+  trash: `<path d="M9 13h30M19 13V8h10v5M13 13l2 27h18l2-27"/><path d="M21 20v13M27 20v13" opacity=".6"/>`,
+
   default: `<path d="M24 5 40 14v20L24 43 8 34V14Z"/><circle cx="24" cy="24" r="5" fill="currentColor" stroke="none" opacity=".6"/>`,
 };
 

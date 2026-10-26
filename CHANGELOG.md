@@ -5,11 +5,15 @@ section becomes the notes of its
 [GitHub release](https://github.com/nodieCode/tablet-deck/releases), so add one
 before tagging a release.
 
-## Unreleased
+## 1.7.0 (2026-10-26)
 
-- **Català:** add Catalan to the deck and Windows app, with automatic selection
-  from the device or Windows language and manual selection in Settings. Existing
-  languages, keybinds and English voice commands are unchanged.
+- **Cargo notes:** the Hauling & Exploration layout has a notepad panel next
+  to QT/Systems, to jot down which cargo goes where and where it sits in your
+  grid. Draw with a finger or an Apple Pencil in four colours, or tap **Aa** and
+  type with the tablet's keyboard (on-screen or Bluetooth); text sits on the
+  ruled lines and drawings go over it. Erase, undo, and flip between three
+  pages. Notes stay on that tablet or phone; once a pen has drawn, a resting
+  palm doesn't.
 
 ## 1.6.0 (2026-10-26)
 

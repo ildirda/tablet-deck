@@ -99,7 +99,8 @@ and one with a new name needs `layout` set in `config.json`.
 Canvas layouts (`hud.json` and friends) place each element at `x`, `y`, `w`, `h`
 in canvas pixels; elements in a panel are relative to their half. Element types
 include `button`, `header`, `switch` (with `when` to show elements per mode),
-`menu`, `slider`, `grid` and decorations. `star-citizen.json` is an older tabbed
+`menu`, `slider`, `grid`, `notepad` (a pad to draw and type on; its `id` names where
+its notes are kept on the device) and decorations. `star-citizen.json` is an older tabbed
 grid layout.
 
 Button fields:

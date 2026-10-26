@@ -170,6 +170,7 @@
       "pager": 36,
       "panels": [
         "systems",
+        "notes",
         "emergency",
         "crew",
         "on-foot",
@@ -181,6 +182,19 @@
     }
   ],
   "panels": {
+    "notes": {
+      "title": "Cargo notes",
+      "elements": [
+        {
+          "type": "notepad",
+          "id": "cargo-notes",
+          "x": 0,
+          "y": 0,
+          "w": 359,
+          "h": 278
+        }
+      ]
+    },
     "landing": {
       "title": "Landing",
       "elements": [
